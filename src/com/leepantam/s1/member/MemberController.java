@@ -1,11 +1,15 @@
 package com.leepantam.s1.member;
 
 import java.io.IOException;
+
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.leepantam.s1.util.ActionFoward;
 
 /**
  * Servlet implementation class MemberController
@@ -13,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/MemberController")
 public class MemberController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
+	MemberService mServ;
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -21,39 +27,72 @@ public class MemberController extends HttpServlet {
         super();
         // TODO Auto-generated constructor stub
     }
-
+    
+    @Override
+    public void init() throws ServletException {
+    	// TODO Auto-generated method stub
+    	mServ = new MemberService();
+    	MemberDAO mDao = new MemberDAO();
+    	mServ.setmDao(mDao);
+    	super.init();
+    }
+    
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		String id = request.getParameter("id");
-		String pw = request.getParameter("pw");
+		System.out.println("Member Controller!!");
 		
-		System.out.println("ID:"+id);
-		System.out.println("PW:"+pw);
+		String uri = request.getRequestURI();
+		String path = request.getServletPath();
+		System.out.println(path);
+		System.out.println(uri);
 		
-		MemberDAO mDao = new MemberDAO();
-		MemberDTO mDto = new MemberDTO();
-		mDto.setID(id);
-		mDto.setPW(pw);
+		// substring
+		String result= uri.substring(uri.lastIndexOf('/')+1);
+		System.out.println(result);
+		String pathInfo = "";
+		ActionFoward actionFoward = null;
 		
-		
-		try {
-			mDto = mDao.login(mDto);
-			if(mDto!=null) {
-				System.out.println("name : "+mDto.getNAME());
-				System.out.println("phone : "+mDto.getPHONE());
-				System.out.println("email : "+mDto.getEMAIL());
+		if(result.equals("memberLogin.do")) {
+			MemberDTO mDto = new MemberDTO();
+			mDto.setID(request.getParameter("id"));
+			mDto.setPW(request.getParameter("pw"));
+			request.setAttribute("dto", mDto);
+			
+			try {
+				actionFoward = mServ.memberLogin(request);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+		}else if(result.equals("memberJoin.do")){
+			
+			try {
+				actionFoward = mServ.memberJoin(request);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}else {
+			System.out.println("error");
 		}
-				
 		
-		System.out.println("Member Controller~!");
-		response.getWriter().append("Served at: ").append(request.getContextPath());
+		//forward
+		if(actionFoward.isCheck()) {
+		RequestDispatcher view = request.getRequestDispatcher(actionFoward.getPath());
+		view.forward(request, response);
+		} else {
+			//redirect
+			response.sendRedirect(actionFoward.getPath());
+			
+		
+		}
+		
+
 	}
 
 	/**

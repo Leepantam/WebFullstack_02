@@ -18,7 +18,16 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>memberLogin</servlet-name>
-		<url-pattern>/member/memberLogin.do</url-pattern>
+		<url-pattern>/member/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>bankbookList</servlet-name>
+		<servlet-class>com.leepantam.s1.bankbook.BankBookController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>bankbookList</servlet-name>
+		<url-pattern>/bankbook/*</url-pattern>
 	</servlet-mapping>
 	
 
