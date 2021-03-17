@@ -20,25 +20,27 @@ import com.leepantam.s1.util.ActionFoward;
 @WebServlet("/BankBookController")
 public class BankBookController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	BankBookService bServ;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public BankBookController() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-    
-    
-    public void init() throws ServletException {
-    	// TODO Auto-generated method stub
-    	bServ = new BankBookService();
-    	BankBookDAO bDao = new BankBookDAO();
-    	bServ.setbDao(bDao);
-    	super.init();
-    }
-    
+
+	private BankBookService bServ;
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public BankBookController() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+
+	public void init() throws ServletException {
+		// TODO Auto-generated method stub
+		// Controller 객체 생성후 자동 호출되는 초기화 메서드
+		bServ = new BankBookService();
+		BankBookDAO bDao = new BankBookDAO();
+		bServ.setbDao(bDao);
+		super.init();
+	}
+
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -46,14 +48,57 @@ public class BankBookController extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+
+		String uri = request.getRequestURI();
+		int index = uri.lastIndexOf("/");
+		uri = uri.substring(index+1);
 		// MemberController 참조
-		ActionFoward actionFoward = new ActionFoward();
-		List<BankBookDTO> list = bServ.getList();
-		actionFoward.setPath("../WEB-INF/bankbook/bankbookList.jsp");
-		System.out.println(list);
-		RequestDispatcher view = request.getRequestDispatcher(actionFoward.getPath());
-		view.forward(request, response);
+		ActionFoward actionFoward;
+		try {
+			
+			
+			if(uri.equals("bankbookList.do")) {
+				actionFoward = bServ.getList(request);
+				if(actionFoward.isCheck()) {
+					RequestDispatcher view = request.getRequestDispatcher(actionFoward.getPath());
+					view.forward(request, response);			
+				} else {
+					response.sendRedirect(actionFoward.getPath());
+				}
+
+			} else if(uri.equals("bankbookSelect.do")) {
+				
+				actionFoward = bServ.getSelect(request);
+				if(actionFoward.isCheck()) {
+					RequestDispatcher view = request.getRequestDispatcher(actionFoward.getPath());
+					view.forward(request, response);			
+				} else {
+					response.sendRedirect(actionFoward.getPath());
+				}
+			} else if(uri.equals("bankbookWrite.do")) {
+				
+				actionFoward = bServ.setWrite(request);
+				
+				if(actionFoward.isCheck()) {
+					RequestDispatcher view = request.getRequestDispatcher(actionFoward.getPath());
+					view.forward(request, response);
+				} else {
+					response.sendRedirect(actionFoward.getPath());
+				}
+			}
+			
+			
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
 	}
+
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
